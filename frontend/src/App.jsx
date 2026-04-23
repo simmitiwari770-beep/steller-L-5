@@ -70,6 +70,7 @@ function App() {
   const [escrows, setEscrows] = useState([]);
   const [message, setMessage] = useState("");
   const [txHistory, setTxHistory] = useState([]);
+  const [lastReceipt, setLastReceipt] = useState(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [loadingEscrowId, setLoadingEscrowId] = useState(null);
@@ -125,6 +126,7 @@ function App() {
     try {
       const tx = await initializeContract(walletAddress);
       setMessage(`Contract initialized: ${tx.hash}`);
+      setLastReceipt({ type: "initialize", ...tx });
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
     } catch (error) {
       setMessage(normalizeErrorMessage(error));
@@ -136,6 +138,7 @@ function App() {
       setIsCreating(true);
       const tx = await createEscrow(walletAddress, payload.seller, payload.amount);
       setMessage(`Escrow created. Tx: ${tx.hash}`);
+      setLastReceipt({ type: "create_escrow", ...tx });
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
       await refreshEscrows();
     } catch (error) {
@@ -165,6 +168,7 @@ function App() {
       }
       const tx = await releaseEscrow(walletAddress, escrowId);
       setMessage(`Escrow released: ${tx.explorer}`);
+      setLastReceipt({ type: "release_payment", ...tx });
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
       await refreshEscrows();
     } catch (error) {
@@ -194,6 +198,7 @@ function App() {
       }
       const tx = await refundEscrow(walletAddress, escrowId);
       setMessage(`Escrow refunded: ${tx.explorer}`);
+      setLastReceipt({ type: "refund_payment", ...tx });
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
       await refreshEscrows();
     } catch (error) {
@@ -287,6 +292,20 @@ function App() {
           <p className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-200">
             {message}
           </p>
+        )}
+        {lastReceipt && (
+          <section className="rounded-xl border border-emerald-800/60 bg-emerald-950/20 p-4">
+            <p className="text-xs text-emerald-300">Latest Transaction Receipt</p>
+            <p className="mt-1 text-sm text-slate-100">{lastReceipt.type}</p>
+            <a
+              href={lastReceipt.explorer}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 block break-all text-xs text-cyan-300 underline"
+            >
+              {lastReceipt.hash}
+            </a>
+          </section>
         )}
         {activeTab === "create" && (
           <CreateEscrowPage

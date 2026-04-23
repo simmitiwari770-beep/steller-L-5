@@ -36,24 +36,31 @@ export default function DashboardPage({
                 Buyer: {shortenAddress(escrow.buyer)} | Seller:{" "}
                 {shortenAddress(escrow.seller)}
               </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={!canAct || loadingId === escrow.id}
-                  onClick={() => onRelease(escrow.id)}
-                  className="rounded-md bg-emerald-500 px-3 py-1 text-xs font-medium text-slate-950 disabled:opacity-40"
-                >
-                  {loadingId === escrow.id ? "Submitting..." : "Release Payment"}
-                </button>
-                <button
-                  type="button"
-                  disabled={!canAct || loadingId === escrow.id}
-                  onClick={() => onRefund(escrow.id)}
-                  className="rounded-md bg-rose-500 px-3 py-1 text-xs font-medium text-slate-950 disabled:opacity-40"
-                >
-                  Refund
-                </button>
-              </div>
+              {canAct ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={loadingId === escrow.id}
+                    onClick={() => onRelease(escrow.id)}
+                    className="rounded-md bg-emerald-500 px-3 py-1 text-xs font-medium text-slate-950 disabled:opacity-40"
+                  >
+                    {loadingId === escrow.id ? "Submitting..." : "Release Payment"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={loadingId === escrow.id}
+                    onClick={() => onRefund(escrow.id)}
+                    className="rounded-md bg-rose-500 px-3 py-1 text-xs font-medium text-slate-950 disabled:opacity-40"
+                  >
+                    Refund
+                  </button>
+                </div>
+              ) : (
+                <p className="mt-3 text-xs text-slate-500">
+                  Actions available only for pending escrows owned by connected
+                  buyer.
+                </p>
+              )}
             </article>
           );
         })}

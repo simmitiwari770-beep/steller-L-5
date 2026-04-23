@@ -6,7 +6,6 @@ import {
   nativeToScVal,
   rpc,
   scValToNative,
-  xdr,
 } from "@stellar/stellar-sdk";
 import {
   getContractId,
@@ -142,11 +141,14 @@ async function readContract(method, args, sourceAddress) {
   if (rpc.Api.isSimulationError(simulated)) {
     throw new Error(simulated.error);
   }
-  return simulated.result?.retval
-    ? scValToNative(
-        xdr.ScVal.fromXDR(simulated.result.retval.toXDR("base64"), "base64"),
-      )
-    : null;
+  if (!simulated.result?.retval) return null;
+
+  try {
+    return scValToNative(simulated.result.retval);
+  } catch {
+    // Fallback to avoid crashing UI on SDK decode edge-cases.
+    return null;
+  }
 }
 
 export async function fetchEscrow(escrowId, sourceAddress) {
