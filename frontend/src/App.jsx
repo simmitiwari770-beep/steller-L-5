@@ -7,6 +7,7 @@ import { connectFreighter } from "./lib/freighter";
 import {
   getContractId,
   getTokenContractId,
+  hasRuntimeConfig,
   setRuntimeContractConfig,
 } from "./lib/constants";
 import {
@@ -19,10 +20,48 @@ import {
 } from "./lib/soroban";
 
 function normalizeStatus(rawStatus) {
-  if (rawStatus === 0 || rawStatus === "Pending") return "Pending";
-  if (rawStatus === 1 || rawStatus === "Released") return "Released";
-  if (rawStatus === 2 || rawStatus === "Refunded") return "Refunded";
+  const normalized =
+    typeof rawStatus === "bigint" ? Number(rawStatus) : rawStatus;
+
+  if (normalized === 0 || normalized === "0" || normalized === "Pending") {
+    return "Pending";
+  }
+  if (normalized === 1 || normalized === "1" || normalized === "Released") {
+    return "Released";
+  }
+  if (normalized === 2 || normalized === "2" || normalized === "Refunded") {
+    return "Refunded";
+  }
   return String(rawStatus);
+}
+
+function normalizeErrorMessage(error) {
+  const message = error?.message || String(error);
+  if (
+    message.includes("create_escrow") &&
+    (message.includes("InvalidAction") || message.includes("UnreachableCodeReached"))
+  ) {
+    return "Escrow creation failed: buyer and seller cannot be the same address.";
+  }
+  if (
+    message.includes("release_payment") &&
+    (message.includes("InvalidAction") || message.includes("UnreachableCodeReached"))
+  ) {
+    return "Release failed: this escrow is no longer pending or you are not the authorized buyer.";
+  }
+  if (
+    message.includes("refund_payment") &&
+    (message.includes("InvalidAction") || message.includes("UnreachableCodeReached"))
+  ) {
+    return "Refund failed: this escrow is no longer pending or you are not the authorized buyer.";
+  }
+  if (
+    message.includes("initialize") &&
+    (message.includes("InvalidAction") || message.includes("UnreachableCodeReached"))
+  ) {
+    return "Contract is already initialized. You can directly create and refresh escrows.";
+  }
+  return message;
 }
 
 function App() {
@@ -36,6 +75,7 @@ function App() {
   const [loadingEscrowId, setLoadingEscrowId] = useState(null);
   const [contractIdInput, setContractIdInput] = useState(getContractId());
   const [tokenIdInput, setTokenIdInput] = useState(getTokenContractId());
+  const [configReady, setConfigReady] = useState(hasRuntimeConfig());
 
   const refreshEscrows = useCallback(async (sourceAddress = walletAddress) => {
     try {
@@ -54,8 +94,9 @@ function App() {
           status: normalizeStatus(item.status),
         })),
       );
+      setMessage("Escrows refreshed from testnet.");
     } catch (error) {
-      setMessage(error.message);
+      setMessage(normalizeErrorMessage(error));
     }
   }, [walletAddress]);
 
@@ -86,7 +127,7 @@ function App() {
       setMessage(`Contract initialized: ${tx.hash}`);
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
     } catch (error) {
-      setMessage(error.message);
+      setMessage(normalizeErrorMessage(error));
     }
   }
 
@@ -98,7 +139,7 @@ function App() {
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
       await refreshEscrows();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(normalizeErrorMessage(error));
     } finally {
       setIsCreating(false);
     }
@@ -107,12 +148,27 @@ function App() {
   async function onReleaseEscrow(escrowId) {
     try {
       setLoadingEscrowId(escrowId);
+      const latestEscrow = await fetchEscrow(escrowId, walletAddress);
+      const latestStatus = normalizeStatus(latestEscrow.status);
+      if (latestEscrow.buyer !== walletAddress) {
+        setMessage(
+          `Release not allowed. Only buyer ${latestEscrow.buyer} can release escrow #${escrowId}.`,
+        );
+        return;
+      }
+      if (latestStatus !== "Pending") {
+        setMessage(
+          `Escrow #${escrowId} is ${latestStatus}. Only pending escrows can be released.`,
+        );
+        await refreshEscrows();
+        return;
+      }
       const tx = await releaseEscrow(walletAddress, escrowId);
       setMessage(`Escrow released: ${tx.explorer}`);
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
       await refreshEscrows();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(normalizeErrorMessage(error));
     } finally {
       setLoadingEscrowId(null);
     }
@@ -121,12 +177,27 @@ function App() {
   async function onRefundEscrow(escrowId) {
     try {
       setLoadingEscrowId(escrowId);
+      const latestEscrow = await fetchEscrow(escrowId, walletAddress);
+      const latestStatus = normalizeStatus(latestEscrow.status);
+      if (latestEscrow.buyer !== walletAddress) {
+        setMessage(
+          `Refund not allowed. Only buyer ${latestEscrow.buyer} can refund escrow #${escrowId}.`,
+        );
+        return;
+      }
+      if (latestStatus !== "Pending") {
+        setMessage(
+          `Escrow #${escrowId} is ${latestStatus}. Only pending escrows can be refunded.`,
+        );
+        await refreshEscrows();
+        return;
+      }
       const tx = await refundEscrow(walletAddress, escrowId);
       setMessage(`Escrow refunded: ${tx.explorer}`);
       setTxHistory((prev) => [tx, ...prev].slice(0, 20));
       await refreshEscrows();
     } catch (error) {
-      setMessage(error.message);
+      setMessage(normalizeErrorMessage(error));
     } finally {
       setLoadingEscrowId(null);
     }
@@ -138,8 +209,15 @@ function App() {
   }
 
   function onSaveConfig() {
-    setRuntimeContractConfig(contractIdInput.trim(), tokenIdInput.trim());
-    setMessage("Contract config saved. Refresh escrows or initialize contract.");
+    const contractId = contractIdInput.trim();
+    const tokenId = tokenIdInput.trim();
+    if (!contractId || !tokenId) {
+      setMessage("Please enter both Escrow Contract ID and Token Contract ID.");
+      return;
+    }
+    setRuntimeContractConfig(contractId, tokenId);
+    setConfigReady(true);
+    setMessage("Contract config saved. Now click Initialize Contract once.");
   }
 
   return (
@@ -181,11 +259,17 @@ function App() {
             </button>
           </div>
         </section>
+        {!configReady && (
+          <p className="rounded-lg border border-amber-700 bg-amber-950/40 px-3 py-2 text-xs text-amber-200">
+            Contract IDs are missing. Add both IDs in Contract Configuration, then
+            save.
+          </p>
+        )}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onInitializeContract}
-            disabled={!walletAddress}
+            disabled={!walletAddress || !configReady}
             className="rounded-md border border-cyan-600 px-3 py-1 text-xs text-cyan-300 disabled:opacity-50"
           >
             Initialize Contract
@@ -193,6 +277,7 @@ function App() {
           <button
             type="button"
             onClick={refreshEscrows}
+            disabled={!walletAddress || !configReady}
             className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300"
           >
             Refresh Escrows

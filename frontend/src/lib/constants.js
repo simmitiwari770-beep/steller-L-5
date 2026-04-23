@@ -26,3 +26,7 @@ export function setRuntimeContractConfig(contractId, tokenContractId) {
   window.localStorage.setItem(LOCAL_CONTRACT_KEY, contractId);
   window.localStorage.setItem(LOCAL_TOKEN_KEY, tokenContractId);
 }
+
+export function hasRuntimeConfig() {
+  return Boolean(getContractId() && getTokenContractId());
+}

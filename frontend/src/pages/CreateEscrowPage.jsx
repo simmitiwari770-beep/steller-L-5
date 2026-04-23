@@ -17,6 +17,10 @@ export default function CreateEscrowPage({ walletAddress, onCreate, loading }) {
       setError("Seller address is invalid.");
       return;
     }
+    if (seller === walletAddress) {
+      setError("Buyer and seller must be different wallet addresses.");
+      return;
+    }
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) {
       setError("Amount must be greater than 0.");

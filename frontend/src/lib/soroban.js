@@ -20,13 +20,21 @@ import { signTxXdr } from "./freighter";
 const server = new rpc.Server(SOROBAN_RPC_URL, { allowHttp: false });
 
 function parseResult(resultXdr) {
-  return resultXdr ? resultXdr.value() : null;
+  if (!resultXdr) return null;
+  try {
+    return scValToNative(resultXdr);
+  } catch {
+    // Return null if SDK cannot decode a specific union variant.
+    return null;
+  }
 }
 
 async function buildAndSendContractTx(walletAddress, method, args = []) {
   const contractId = getContractId();
   if (!contractId) {
-    throw new Error("Missing VITE_SOROBAN_CONTRACT_ID in frontend .env.");
+    throw new Error(
+      "Escrow Contract ID missing. Add it in Contract Configuration or frontend/.env.",
+    );
   }
 
   const sourceAccount = await server.getAccount(walletAddress);
@@ -78,7 +86,9 @@ async function buildAndSendContractTx(walletAddress, method, args = []) {
 export async function initializeContract(walletAddress) {
   const tokenContractId = getTokenContractId();
   if (!tokenContractId) {
-    throw new Error("Missing VITE_SOROBAN_TOKEN_CONTRACT_ID in frontend .env.");
+    throw new Error(
+      "Token Contract ID missing. Add it in Contract Configuration or frontend/.env.",
+    );
   }
   return buildAndSendContractTx(walletAddress, "initialize", [
     Address.fromString(tokenContractId).toScVal(),
@@ -112,7 +122,9 @@ export async function refundEscrow(walletAddress, escrowId) {
 async function readContract(method, args, sourceAddress) {
   const contractId = getContractId();
   if (!contractId) {
-    throw new Error("Missing VITE_SOROBAN_CONTRACT_ID in frontend .env.");
+    throw new Error(
+      "Escrow Contract ID missing. Add it in Contract Configuration or frontend/.env.",
+    );
   }
   if (!sourceAddress) {
     throw new Error("Connect Freighter before reading escrow data.");
