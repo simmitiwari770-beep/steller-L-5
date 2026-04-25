@@ -8,6 +8,21 @@ import {
 } from "@stellar/freighter-api";
 import { NETWORK_PASSPHRASE } from "./constants";
 
+function normalizeFreighterError(error, fallback) {
+  const raw = error?.message || String(error || "");
+  const lowered = raw.toLowerCase();
+  if (lowered.includes("rejected") || lowered.includes("declined")) {
+    return "User rejected transaction in Freighter.";
+  }
+  if (lowered.includes("not installed") || lowered.includes("freighter")) {
+    return "Freighter not installed. Install from https://freighter.app/";
+  }
+  if (lowered.includes("testnet") || lowered.includes("network")) {
+    return "Switch Freighter network to Stellar Testnet.";
+  }
+  return raw || fallback;
+}
+
 export async function connectFreighter() {
   const connected = await isConnected();
   if (connected.error || !connected.isConnected) {
@@ -20,7 +35,7 @@ export async function connectFreighter() {
   if (allowed.error || !allowed.isAllowed) {
     const access = await requestAccess();
     if (access.error) {
-      throw new Error(access.error.message || "Freighter access denied.");
+      throw new Error(normalizeFreighterError(access.error, "Freighter access denied."));
     }
   }
 
@@ -45,14 +60,16 @@ export async function connectFreighter() {
 }
 
 export async function signTxXdr(txXdr, accountToSign) {
-  const signed = await signTransaction(txXdr, {
+  const xdrPayload = typeof txXdr === "string" ? txXdr : txXdr?.toString?.() || "";
+  if (!xdrPayload) {
+    throw new Error("Invalid transaction payload for Freighter signature.");
+  }
+  const signed = await signTransaction(xdrPayload, {
     networkPassphrase: NETWORK_PASSPHRASE,
     accountToSign,
   });
   if (signed.error || !signed.signedTxXdr) {
-    throw new Error(
-      signed.error?.message || "Transaction signature was rejected.",
-    );
+    throw new Error(normalizeFreighterError(signed.error, "Transaction signature was rejected."));
   }
   return signed.signedTxXdr;
 }

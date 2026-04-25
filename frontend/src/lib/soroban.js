@@ -6,6 +6,7 @@ import {
   nativeToScVal,
   rpc,
   scValToNative,
+  xdr,
 } from "@stellar/stellar-sdk";
 import {
   getContractId,
@@ -17,10 +18,14 @@ import {
 import { signTxXdr } from "./freighter";
 
 const server = new rpc.Server(SOROBAN_RPC_URL, { allowHttp: false });
+const TX_POLL_TIMEOUT_MS = 45_000;
 
 function parseResult(resultXdr) {
   if (!resultXdr) return null;
   try {
+    if (typeof resultXdr === "string") {
+      return scValToNative(xdr.ScVal.fromXDR(resultXdr, "base64"));
+    }
     return scValToNative(resultXdr);
   } catch {
     // Return null if SDK cannot decode a specific union variant.
@@ -28,11 +33,35 @@ function parseResult(resultXdr) {
   }
 }
 
+function decodeScVal(retval) {
+  if (!retval) return null;
+  try {
+    if (typeof retval === "string") {
+      return scValToNative(xdr.ScVal.fromXDR(retval, "base64"));
+    }
+    return scValToNative(retval);
+  } catch {
+    // Newer SDK responses may already be decoded native values.
+    return retval;
+  }
+}
+
+function normalizeSignedXdrPayload(signedXdr) {
+  if (typeof signedXdr === "string") return signedXdr;
+  if (signedXdr && typeof signedXdr.signedTxXdr === "string") {
+    return signedXdr.signedTxXdr;
+  }
+  if (signedXdr && typeof signedXdr.xdr === "string") {
+    return signedXdr.xdr;
+  }
+  return "";
+}
+
 async function buildAndSendContractTx(walletAddress, method, args = []) {
   const contractId = getContractId();
   if (!contractId) {
     throw new Error(
-      "Escrow Contract ID missing. Add it in Contract Configuration or frontend/.env.",
+      "Escrow Contract ID missing. Set it in frontend/.env.",
     );
   }
 
@@ -49,19 +78,28 @@ async function buildAndSendContractTx(walletAddress, method, args = []) {
 
   const sim = await server.simulateTransaction(tx);
   if (rpc.Api.isSimulationError(sim)) {
-    throw new Error(sim.error);
+    throw new Error(sim.error || "Contract call simulation failed.");
   }
 
   const preparedTx = rpc.assembleTransaction(tx, sim).build();
-  const signedXdr = await signTxXdr(preparedTx.toXDR(), walletAddress);
+  const txXdrBase64 = preparedTx.toXDR("base64");
+  const signedXdrRaw = await signTxXdr(txXdrBase64, walletAddress);
+  const signedXdr = normalizeSignedXdrPayload(signedXdrRaw);
+  if (!signedXdr) {
+    throw new Error("Invalid signed transaction payload from wallet.");
+  }
   const signedTx = TransactionBuilder.fromXDR(signedXdr, NETWORK_PASSPHRASE);
 
   const sent = await server.sendTransaction(signedTx);
   if (sent.status === "ERROR") {
     throw new Error(sent.errorResultXdr || "Transaction submission failed.");
   }
+  if (sent.status !== "PENDING") {
+    throw new Error("Transaction was not accepted by Soroban RPC.");
+  }
 
   let txResult = null;
+  const startTime = Date.now();
   while (!txResult) {
     const fetched = await server.getTransaction(sent.hash);
     if (fetched.status === "SUCCESS") {
@@ -70,6 +108,11 @@ async function buildAndSendContractTx(walletAddress, method, args = []) {
     }
     if (fetched.status === "FAILED") {
       throw new Error("Transaction failed on chain.");
+    }
+    if (Date.now() - startTime > TX_POLL_TIMEOUT_MS) {
+      throw new Error(
+        `Transaction submission timed out. Check explorer: ${STELLAR_EXPERT_TX_BASE}${sent.hash}`,
+      );
     }
     await new Promise((resolve) => setTimeout(resolve, 1400));
   }
@@ -86,7 +129,7 @@ export async function initializeContract(walletAddress) {
   const tokenContractId = getTokenContractId();
   if (!tokenContractId) {
     throw new Error(
-      "Token Contract ID missing. Add it in Contract Configuration or frontend/.env.",
+      "Token Contract ID missing. Set it in frontend/.env.",
     );
   }
   return buildAndSendContractTx(walletAddress, "initialize", [
@@ -122,7 +165,7 @@ async function readContract(method, args, sourceAddress) {
   const contractId = getContractId();
   if (!contractId) {
     throw new Error(
-      "Escrow Contract ID missing. Add it in Contract Configuration or frontend/.env.",
+      "Escrow Contract ID missing. Set it in frontend/.env.",
     );
   }
   if (!sourceAddress) {
@@ -139,28 +182,34 @@ async function readContract(method, args, sourceAddress) {
     .build();
   const simulated = await server.simulateTransaction(tx);
   if (rpc.Api.isSimulationError(simulated)) {
-    throw new Error(simulated.error);
+    throw new Error(simulated.error || "Failed to read contract from Soroban RPC.");
   }
-  if (!simulated.result?.retval) return null;
-
-  try {
-    return scValToNative(simulated.result.retval);
-  } catch {
-    // Fallback to avoid crashing UI on SDK decode edge-cases.
-    return null;
-  }
+  return simulated.result?.retval || null;
 }
 
 export async function fetchEscrow(escrowId, sourceAddress) {
-  return readContract(
+  const retval = await readContract(
     "get_escrow",
     [nativeToScVal(Number(escrowId), { type: "u64" })],
     sourceAddress,
   );
+  if (!retval) return null;
+  try {
+    const decoded = decodeScVal(retval);
+    return decoded && typeof decoded === "object" ? decoded : null;
+  } catch {
+    throw new Error("Failed to decode escrow data from chain. Please refresh.");
+  }
 }
 
 export async function fetchEscrowIds(sourceAddress) {
-  const result = await readContract("list_escrows", [], sourceAddress);
-  const vec = Array.isArray(result) ? result : [];
-  return vec.map((entry) => Number(entry));
+  const retval = await readContract("list_escrows", [], sourceAddress);
+  if (!retval) return [];
+  try {
+    const decoded = decodeScVal(retval);
+    if (!Array.isArray(decoded)) return [];
+    return decoded.map((entry) => Number(entry));
+  } catch {
+    throw new Error("Failed to decode escrow ids from chain. Please refresh.");
+  }
 }

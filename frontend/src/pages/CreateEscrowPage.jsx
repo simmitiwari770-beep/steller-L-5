@@ -26,6 +26,15 @@ export default function CreateEscrowPage({ walletAddress, onCreate, loading }) {
       setError("Amount must be greater than 0.");
       return;
     }
+    if (numericAmount > 10_000_000) {
+      setError("Amount is too large for a single escrow.");
+      return;
+    }
+    const decimals = String(amount).split(".")[1]?.length || 0;
+    if (decimals > 7) {
+      setError("Amount supports up to 7 decimal places.");
+      return;
+    }
     await onCreate({ seller, amount: numericAmount });
   }
 
@@ -47,6 +56,7 @@ export default function CreateEscrowPage({ walletAddress, onCreate, loading }) {
           <input
             type="number"
             step="0.0000001"
+            min="0.0000001"
             className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
@@ -59,7 +69,7 @@ export default function CreateEscrowPage({ walletAddress, onCreate, loading }) {
         <button
           type="submit"
           className="rounded-lg bg-cyan-400 px-4 py-2 font-semibold text-slate-950 disabled:opacity-60"
-          disabled={loading}
+          disabled={loading || !walletAddress}
         >
           {loading ? "Locking funds..." : "Lock Funds"}
         </button>

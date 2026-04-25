@@ -1,15 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
+import ToastStack from "./components/ToastStack";
 import CreateEscrowPage from "./pages/CreateEscrowPage";
 import DashboardPage from "./pages/DashboardPage";
 import HomePage from "./pages/HomePage";
 import { connectFreighter } from "./lib/freighter";
-import {
-  getContractId,
-  getTokenContractId,
-  hasRuntimeConfig,
-  setRuntimeContractConfig,
-} from "./lib/constants";
 import {
   createEscrow,
   fetchEscrow,
@@ -18,6 +13,34 @@ import {
   refundEscrow,
   releaseEscrow,
 } from "./lib/soroban";
+
+const TX_HISTORY_KEY = "trustpay_tx_history";
+const ESCROW_TX_MAP_KEY = "trustpay_escrow_tx_map";
+const TOAST_TTL_MS = 4200;
+
+function loadPersistedHistory() {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(TX_HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadEscrowTxMap() {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(ESCROW_TX_MAP_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
 function normalizeStatus(rawStatus) {
   const normalized =
@@ -37,6 +60,25 @@ function normalizeStatus(rawStatus) {
 
 function normalizeErrorMessage(error) {
   const message = error?.message || String(error);
+  const lowered = message.toLowerCase();
+  if (lowered.includes("bad union switch")) {
+    return "Contract response decode issue detected. Raw error: " + message;
+  }
+  if (lowered.includes("encoded argument must be of type string")) {
+    return "Transaction payload format error. Please try again.";
+  }
+  if (lowered.includes("not installed")) {
+    return "Freighter not installed. Install from https://freighter.app/";
+  }
+  if (lowered.includes("rejected") || lowered.includes("declined")) {
+    return "User rejected transaction in Freighter.";
+  }
+  if (lowered.includes("testnet") || lowered.includes("network")) {
+    return "Wrong network detected. Switch Freighter to Stellar Testnet.";
+  }
+  if (lowered.includes("insufficient")) {
+    return "Insufficient balance to complete this escrow transaction.";
+  }
   if (
     message.includes("create_escrow") &&
     (message.includes("InvalidAction") || message.includes("UnreachableCodeReached"))
@@ -69,37 +111,92 @@ function App() {
   const [walletAddress, setWalletAddress] = useState("");
   const [escrows, setEscrows] = useState([]);
   const [message, setMessage] = useState("");
-  const [txHistory, setTxHistory] = useState([]);
+  const [txHistory, setTxHistory] = useState(loadPersistedHistory);
+  const [escrowTxMap, setEscrowTxMap] = useState(loadEscrowTxMap);
   const [lastReceipt, setLastReceipt] = useState(null);
+  const [toasts, setToasts] = useState([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingEscrowId, setLoadingEscrowId] = useState(null);
-  const [contractIdInput, setContractIdInput] = useState(getContractId());
-  const [tokenIdInput, setTokenIdInput] = useState(getTokenContractId());
-  const [configReady, setConfigReady] = useState(hasRuntimeConfig());
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(TX_HISTORY_KEY, JSON.stringify(txHistory));
+  }, [txHistory]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ESCROW_TX_MAP_KEY, JSON.stringify(escrowTxMap));
+  }, [escrowTxMap]);
+
+  const notify = useCallback((type, msg) => {
+    const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    setToasts((prev) => [...prev, { id, type, message: msg }]);
+    window.setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, TOAST_TTL_MS);
+  }, []);
+
+  function pushTxReceipt(tx, type, escrowId) {
+    const safeTx = {
+      hash: tx.hash,
+      explorer: tx.explorer,
+      type: type,
+    };
+    setLastReceipt(safeTx);
+    setTxHistory((prev) => [safeTx, ...prev].slice(0, 30));
+    if (escrowId !== undefined && escrowId !== null) {
+      setEscrowTxMap((prev) => ({
+        ...prev,
+        [escrowId]: safeTx,
+      }));
+    }
+  }
 
   const refreshEscrows = useCallback(async (sourceAddress = walletAddress) => {
     try {
+      setIsRefreshing(true);
       if (!sourceAddress) {
         setEscrows([]);
         return;
       }
       const ids = await fetchEscrowIds(sourceAddress);
-      const rows = await Promise.all(ids.map((id) => fetchEscrow(id, sourceAddress)));
-      setEscrows(
-        rows.map((item) => ({
-          id: Number(item.id),
-          buyer: item.buyer,
-          seller: item.seller,
-          amount: item.amount,
-          status: normalizeStatus(item.status),
-        })),
+      const rows = await Promise.allSettled(
+        ids.map((id) => fetchEscrow(id, sourceAddress)),
       );
-      setMessage("Escrows refreshed from testnet.");
+      const fulfilled = rows
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value)
+        .filter(Boolean);
+      setEscrows(
+        fulfilled
+          .filter(Boolean)
+          .map((item) => ({
+            id: Number(item.id),
+            buyer: item.buyer,
+            seller: item.seller,
+            amount: item.amount,
+            status: normalizeStatus(item.status),
+          }))
+          .sort((a, b) => b.id - a.id),
+      );
+      const failedCount = rows.length - fulfilled.length;
+      setMessage(
+        failedCount > 0
+          ? `Escrows refreshed with ${failedCount} item(s) skipped due to decode/read mismatch.`
+          : "Escrows refreshed from testnet.",
+      );
+      notify("info", "Escrows refreshed from on-chain testnet data.");
     } catch (error) {
-      setMessage(normalizeErrorMessage(error));
+      const normalized = normalizeErrorMessage(error);
+      setMessage(normalized);
+      notify("error", normalized);
+    } finally {
+      setIsRefreshing(false);
     }
-  }, [walletAddress]);
+  }, [notify, walletAddress]);
 
   useEffect(() => {
     const load = async () => {
@@ -114,9 +211,12 @@ function App() {
       const addr = await connectFreighter();
       setWalletAddress(addr);
       setMessage("Freighter connected on testnet.");
+      notify("success", "Freighter connected on Testnet.");
       await refreshEscrows(addr);
     } catch (error) {
-      setMessage(error.message);
+      const text = normalizeErrorMessage(error);
+      setMessage(text);
+      notify("error", text);
     } finally {
       setIsConnecting(false);
     }
@@ -124,25 +224,35 @@ function App() {
 
   async function onInitializeContract() {
     try {
+      setIsInitializing(true);
+      notify("info", "Transaction submitted. Check Freighter for signature.");
       const tx = await initializeContract(walletAddress);
       setMessage(`Contract initialized: ${tx.hash}`);
-      setLastReceipt({ type: "initialize", ...tx });
-      setTxHistory((prev) => [tx, ...prev].slice(0, 20));
+      pushTxReceipt(tx, "initialize");
+      notify("success", "Contract initialized successfully.");
     } catch (error) {
-      setMessage(normalizeErrorMessage(error));
+      const normalized = normalizeErrorMessage(error);
+      setMessage(normalized);
+      notify("error", normalized);
+    } finally {
+      setIsInitializing(false);
     }
   }
 
   async function onCreateEscrow(payload) {
     try {
       setIsCreating(true);
+      notify("info", "Transaction submitted. Confirm in Freighter.");
       const tx = await createEscrow(walletAddress, payload.seller, payload.amount);
       setMessage(`Escrow created. Tx: ${tx.hash}`);
-      setLastReceipt({ type: "create_escrow", ...tx });
-      setTxHistory((prev) => [tx, ...prev].slice(0, 20));
+      const escrowId = Number(tx.returnValue);
+      pushTxReceipt(tx, "create_escrow", Number.isFinite(escrowId) ? escrowId : null);
+      notify("success", "Escrow created on Stellar Testnet.");
       await refreshEscrows();
     } catch (error) {
-      setMessage(normalizeErrorMessage(error));
+      const normalized = normalizeErrorMessage(error);
+      setMessage(normalized);
+      notify("error", normalized);
     } finally {
       setIsCreating(false);
     }
@@ -151,28 +261,47 @@ function App() {
   async function onReleaseEscrow(escrowId) {
     try {
       setLoadingEscrowId(escrowId);
-      const latestEscrow = await fetchEscrow(escrowId, walletAddress);
-      const latestStatus = normalizeStatus(latestEscrow.status);
-      if (latestEscrow.buyer !== walletAddress) {
+      const cachedEscrow = escrows.find((item) => item.id === escrowId);
+      if (!cachedEscrow) {
+        setMessage(`Escrow #${escrowId} not found. Refresh dashboard and retry.`);
+        return;
+      }
+      let chainEscrow = cachedEscrow;
+      try {
+        const chainEscrowRaw = await fetchEscrow(escrowId, walletAddress);
+        if (chainEscrowRaw) {
+          chainEscrow = {
+            ...chainEscrowRaw,
+            status: normalizeStatus(chainEscrowRaw.status),
+          };
+        }
+      } catch {
+        notify("info", "Live escrow check skipped. Using latest dashboard state.");
+      }
+
+      if (chainEscrow.buyer !== walletAddress) {
         setMessage(
-          `Release not allowed. Only buyer ${latestEscrow.buyer} can release escrow #${escrowId}.`,
+          `Release not allowed. Only buyer ${chainEscrow.buyer} can release escrow #${escrowId}.`,
         );
         return;
       }
-      if (latestStatus !== "Pending") {
+      if (chainEscrow.status !== "Pending") {
         setMessage(
-          `Escrow #${escrowId} is ${latestStatus}. Only pending escrows can be released.`,
+          `Escrow #${escrowId} is ${chainEscrow.status} on-chain. Only pending escrows can be released.`,
         );
-        await refreshEscrows();
         return;
       }
+      setMessage("Opening Freighter for release signature...");
+      notify("info", "Transaction submitted. Confirm release in Freighter.");
       const tx = await releaseEscrow(walletAddress, escrowId);
       setMessage(`Escrow released: ${tx.explorer}`);
-      setLastReceipt({ type: "release_payment", ...tx });
-      setTxHistory((prev) => [tx, ...prev].slice(0, 20));
+      pushTxReceipt(tx, "release_payment", escrowId);
+      notify("success", `Escrow #${escrowId} released.`);
       await refreshEscrows();
     } catch (error) {
-      setMessage(normalizeErrorMessage(error));
+      const normalized = normalizeErrorMessage(error);
+      setMessage(normalized);
+      notify("error", normalized);
     } finally {
       setLoadingEscrowId(null);
     }
@@ -181,48 +310,77 @@ function App() {
   async function onRefundEscrow(escrowId) {
     try {
       setLoadingEscrowId(escrowId);
-      const latestEscrow = await fetchEscrow(escrowId, walletAddress);
-      const latestStatus = normalizeStatus(latestEscrow.status);
-      if (latestEscrow.buyer !== walletAddress) {
+      const cachedEscrow = escrows.find((item) => item.id === escrowId);
+      if (!cachedEscrow) {
+        setMessage(`Escrow #${escrowId} not found. Refresh dashboard and retry.`);
+        return;
+      }
+      let chainEscrow = cachedEscrow;
+      try {
+        const chainEscrowRaw = await fetchEscrow(escrowId, walletAddress);
+        if (chainEscrowRaw) {
+          chainEscrow = {
+            ...chainEscrowRaw,
+            status: normalizeStatus(chainEscrowRaw.status),
+          };
+        }
+      } catch {
+        notify("info", "Live escrow check skipped. Using latest dashboard state.");
+      }
+
+      if (chainEscrow.buyer !== walletAddress) {
         setMessage(
-          `Refund not allowed. Only buyer ${latestEscrow.buyer} can refund escrow #${escrowId}.`,
+          `Refund not allowed. Only buyer ${chainEscrow.buyer} can refund escrow #${escrowId}.`,
         );
         return;
       }
-      if (latestStatus !== "Pending") {
+      if (chainEscrow.status !== "Pending") {
         setMessage(
-          `Escrow #${escrowId} is ${latestStatus}. Only pending escrows can be refunded.`,
+          `Escrow #${escrowId} is ${chainEscrow.status} on-chain. Only pending escrows can be refunded.`,
         );
-        await refreshEscrows();
         return;
       }
+      setMessage("Opening Freighter for refund signature...");
+      notify("info", "Transaction submitted. Confirm refund in Freighter.");
       const tx = await refundEscrow(walletAddress, escrowId);
       setMessage(`Escrow refunded: ${tx.explorer}`);
-      setLastReceipt({ type: "refund_payment", ...tx });
-      setTxHistory((prev) => [tx, ...prev].slice(0, 20));
+      pushTxReceipt(tx, "refund_payment", escrowId);
+      notify("success", `Escrow #${escrowId} refunded.`);
       await refreshEscrows();
     } catch (error) {
-      setMessage(normalizeErrorMessage(error));
+      const normalized = normalizeErrorMessage(error);
+      setMessage(normalized);
+      notify("error", normalized);
     } finally {
       setLoadingEscrowId(null);
     }
   }
 
-  function onCopyAddress() {
-    navigator.clipboard.writeText(walletAddress);
-    setMessage("Wallet address copied.");
+  async function onCopyAddress() {
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      setMessage("Wallet address copied.");
+      notify("success", "Wallet address copied.");
+    } catch {
+      setMessage("Unable to copy wallet address from this browser context.");
+      notify("error", "Unable to copy wallet address.");
+    }
   }
 
-  function onSaveConfig() {
-    const contractId = contractIdInput.trim();
-    const tokenId = tokenIdInput.trim();
-    if (!contractId || !tokenId) {
-      setMessage("Please enter both Escrow Contract ID and Token Contract ID.");
+  function onUnavailableAction(escrow) {
+    if (!walletAddress) {
+      setMessage("Connect Freighter wallet first to sign transactions.");
       return;
     }
-    setRuntimeContractConfig(contractId, tokenId);
-    setConfigReady(true);
-    setMessage("Contract config saved. Now click Initialize Contract once.");
+    if (escrow.buyer !== walletAddress) {
+      setMessage(
+        `Only buyer ${escrow.buyer} can approve Release/Refund for escrow #${escrow.id}.`,
+      );
+      return;
+    }
+    setMessage(
+      `Escrow #${escrow.id} is ${escrow.status}. Actions work only for Pending status.`,
+    );
   }
 
   return (
@@ -235,57 +393,22 @@ function App() {
         isConnecting={isConnecting}
       />
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-6">
-        <section className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <h3 className="text-sm font-semibold text-cyan-300">
-            Contract Configuration
-          </h3>
-          <p className="mt-1 text-xs text-slate-400">
-            Set once if `.env` is missing. Values are saved in your browser.
-          </p>
-          <div className="mt-3 grid gap-2">
-            <input
-              className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-xs"
-              placeholder="Escrow Contract ID (C...)"
-              value={contractIdInput}
-              onChange={(event) => setContractIdInput(event.target.value)}
-            />
-            <input
-              className="rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-xs"
-              placeholder="Token Contract ID (C...)"
-              value={tokenIdInput}
-              onChange={(event) => setTokenIdInput(event.target.value)}
-            />
-            <button
-              type="button"
-              onClick={onSaveConfig}
-              className="w-fit rounded-md bg-cyan-400 px-3 py-1 text-xs font-semibold text-slate-950"
-            >
-              Save Config
-            </button>
-          </div>
-        </section>
-        {!configReady && (
-          <p className="rounded-lg border border-amber-700 bg-amber-950/40 px-3 py-2 text-xs text-amber-200">
-            Contract IDs are missing. Add both IDs in Contract Configuration, then
-            save.
-          </p>
-        )}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={onInitializeContract}
-            disabled={!walletAddress || !configReady}
+            disabled={!walletAddress || isInitializing}
             className="rounded-md border border-cyan-600 px-3 py-1 text-xs text-cyan-300 disabled:opacity-50"
           >
-            Initialize Contract
+            {isInitializing ? "Initializing..." : "Initialize Contract"}
           </button>
           <button
             type="button"
             onClick={refreshEscrows}
-            disabled={!walletAddress || !configReady}
+            disabled={!walletAddress || isRefreshing}
             className="rounded-md border border-slate-700 px-3 py-1 text-xs text-slate-300"
           >
-            Refresh Escrows
+            {isRefreshing ? "Refreshing..." : "Refresh Escrows"}
           </button>
         </div>
         {message && (
@@ -320,7 +443,9 @@ function App() {
             walletAddress={walletAddress}
             onRelease={onReleaseEscrow}
             onRefund={onRefundEscrow}
+            onUnavailableAction={onUnavailableAction}
             loadingId={loadingEscrowId}
+            escrowTxMap={escrowTxMap}
           />
         )}
         {activeTab === "home" && (
@@ -331,14 +456,15 @@ function App() {
             Recent Transactions
           </h3>
           <div className="mt-2 space-y-2">
-            {txHistory.map((tx) => (
+            {txHistory.map((tx, idx) => (
               <a
-                key={tx.hash}
+                key={`${tx.hash}-${idx}`}
                 href={tx.explorer}
                 target="_blank"
                 rel="noreferrer"
                 className="block truncate text-xs text-cyan-300 underline"
               >
+                {tx.type ? `${tx.type}: ` : ""}
                 {tx.hash}
               </a>
             ))}
@@ -350,6 +476,10 @@ function App() {
           </div>
         </section>
       </main>
+      <ToastStack
+        toasts={toasts}
+        onDismiss={(id) => setToasts((prev) => prev.filter((item) => item.id !== id))}
+      />
     </div>
   );
 }

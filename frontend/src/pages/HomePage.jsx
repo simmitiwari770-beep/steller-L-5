@@ -28,20 +28,21 @@ export default function HomePage({ walletAddress, onCopy }) {
       </div>
 
       <div className="space-y-2 rounded-lg border border-cyan-800/60 bg-cyan-950/20 p-4 text-sm">
-        <p className="font-semibold text-cyan-200">Onboarding</p>
+        <p className="font-semibold text-cyan-200">How to test</p>
         <ol className="list-decimal space-y-1 pl-4 text-slate-300">
-          <li>Install Freighter and switch network to Testnet.</li>
-          <li>Fund your buyer account with Friendbot test XLM.</li>
-          <li>Create escrow and approve transaction in Freighter.</li>
-          <li>Release payment after service/product delivery.</li>
+          <li>Install Freighter wallet extension.</li>
+          <li>Switch Freighter network to Testnet.</li>
+          <li>Fund your wallet using Friendbot.</li>
+          <li>Create escrow and approve signatures in Freighter.</li>
+          <li>Open Dashboard and verify hash/explorer updates.</li>
         </ol>
         <a
-          className="text-cyan-300 underline"
+          className="inline-block rounded border border-cyan-700 px-3 py-1 text-cyan-300 hover:bg-cyan-950/40"
           href={`${HORIZON_URL}/friendbot?addr=${walletAddress || ""}`}
           target="_blank"
           rel="noreferrer"
         >
-          Open Friendbot funding link
+          Open Friendbot
         </a>
       </div>
     </section>

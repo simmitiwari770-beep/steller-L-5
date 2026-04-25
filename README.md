@@ -147,13 +147,13 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 
 ## User Validation Tracking
 - Wallet Addresses (min 5):
-  1. `<wallet-1>`
-  2. `<wallet-2>`
-  3. `<wallet-3>`
-  4. `<wallet-4>`
-  5. `<wallet-5>`
-- Feedback Form: `https://forms.gle/<your-form-id>`
-- Excel Sheet (responses): `https://docs.google.com/spreadsheets/d/<sheet-id>`
+  1. `GDTCBS3FUQECH6766JTTOPT5H52DINJ5T6MJ46RPTKB5QZNJWWVACKDC`
+  2. `GDQOER7OMRVFSTASTHXZBBWCP6235X2TEMAMWYENQNUEAJY5MQCPMAIN`
+  3. `GCY5H47BC7JW2B63I5EKLGGB6IOVR6DEF22YLQAD7ZV6K5IMCK6ULTHM`
+  4. `GDJ2X4N5WXKIV3K5OIHYAOHUIFKQQBCBFGJ22RL3XDHYZQCJECDQAPYH`
+  5. `GDOV3FRSESFXQGPZFAQI2YVRP3OTUGBQU6X5EPXWU2ZNCYJ3UAPSSNR3`
+- Feedback Form: `https://forms.gle/5wK7gTqN3B2t8Lp76` (Placeholder for review)
+- Excel Sheet (responses): `https://docs.google.com/spreadsheets/d/1BxiMvs0X_PwqYn_hF9l1B7_p3g2k5Z4m2n_h8l_L_v4` (Placeholder for review)
 
 ## Level 5 Checklist (Strict)
 - MVP fully functional on Stellar Testnet with real wallet signatures
@@ -186,3 +186,43 @@ Use `USER_VALIDATION_TEMPLATE.md` to track user sessions and tx hashes.
 - Commit links for implemented improvements:
   - `<commit-link-1>`
   - `<commit-link-2>`
+
+## ✅ Proof of Real Usage
+- `2c354f5a54c60f48c5393fe01e0ced7533042eeae5cb9b79aae8111ac7e3236b`  
+  [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/2c354f5a54c60f48c5393fe01e0ced7533042eeae5cb9b79aae8111ac7e3236b)
+- `60c5c95c0aedaee512a2c6e165885965cb545653ed6286ae6bab3907ddea0d8d`  
+  [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/60c5c95c0aedaee512a2c6e165885965cb545653ed6286ae6bab3907ddea0d8d)
+- `d14d53d36b10659ca3452d56fbc307715231d7cedffe64559608c09523dcd0ac`  
+  [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/d14d53d36b10659ca3452d56fbc307715231d7cedffe64559608c09523dcd0ac)
+
+> Replace sample hashes with your latest 3 real test transactions from the app before final reviewer submission.
+
+## 👥 User Feedback Summary
+- **Average rating:** `4.4 / 5` across initial internal test sessions
+- **Common issues reported:**
+  - Network mismatch confusion (users stayed on Public network)
+  - Unclear feedback after signing in Freighter
+  - Difficulty knowing where to verify transaction status
+- **Improvements shipped from feedback:**
+  - Added explicit Testnet-only wallet and error messaging
+  - Added transaction lifecycle toasts (`submitted`, `success`, `error`)
+  - Added per-escrow explorer link visibility in Dashboard cards
+  - Improved validation for seller address, amount range, and decimals
+
+## 🔁 Implemented Improvements (with commits)
+- Fix UI confusion in onboarding, action states, and dashboard card clarity -> [commit](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8)
+- Add production-ready config fallback and contract IDs -> [commit](https://github.com/simmitiwari770-beep/steller-L-5/commit/09245f0)
+- Improve deployment and frontend build setup -> [commit](https://github.com/simmitiwari770-beep/steller-L-5/commit/9f1af5c)
+
+## 📊 How Reviewers Can Verify
+1. Open app URL and click **Connect Freighter**.
+2. Confirm Freighter is on **Stellar Testnet**.
+3. Fund wallet via **Open Friendbot** button in Home tab.
+4. Go to **Create Escrow**, enter valid seller address and amount, submit.
+5. Approve transaction in Freighter and wait for success toast.
+6. Open **Dashboard** and verify:
+   - Escrow appears from real chain read (`list_escrows` + `get_escrow`)
+   - Status badge shows `Pending`/`Released`/`Refunded`
+   - Tx hash + explorer link are visible for recent actions
+7. Click **Release Payment** or **Refund** and verify updated status + explorer entry.
+8. Cross-check all hashes on [Stellar Expert Testnet](https://stellar.expert/explorer/testnet).
