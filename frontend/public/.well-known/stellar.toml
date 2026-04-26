@@ -1,0 +1,11 @@
+# TrustPay Escrow Stellar configuration
+NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+
+[DOCUMENTATION]
+ORG_NAME="TrustPay Escrow"
+ORG_URL="https://steller-l-5.vercel.app"
+ORG_DESCRIPTION="Decentralized Escrow Payment System on Stellar Soroban"
+
+[[PRINCIPALS]]
+name="Developer"
+email="support@steller-l-5.vercel.app"

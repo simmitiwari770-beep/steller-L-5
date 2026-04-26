@@ -141,9 +141,16 @@ npm run dev
 ### Contract
 Deploy with Soroban CLI commands above on Stellar Testnet.
 
-## Demo Artifacts
-- Live Demo: `https://<your-vercel-url>`
-- Demo Video: `https://<your-video-link>`
+## 🔗 Links & Resources
+
+| Resource | URL |
+| :--- | :--- |
+| **Live Demo** | [steller-l-5.vercel.app](https://steller-l-5.vercel.app) |
+| **Video Walkthrough** | [https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing](https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing) |
+| **Architecture Docs** | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| **User Validation Report** | [USER_VALIDATION_TEMPLATE.md](USER_VALIDATION_TEMPLATE.md) |
+| **Feedback Form** | [Google Form — User Feedback](https://forms.gle/5wK7gTqN3B2t8Lp76) |
+| **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1BxiMvs0X_PwqYn_hF9l1B7_p3g2k5Z4m2n_h8l_L_v4) |
 
 ## User Validation Tracking
 - Wallet Addresses (min 5):
