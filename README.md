@@ -146,8 +146,9 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 | Resource | URL |
 | :--- | :--- |
 | **Live Demo** | [steller-l-5.vercel.app](https://steller-l-5.vercel.app) |
-| **Video Walkthrough** | (https://drive.google.com/file/d/1nW3efQ1AVxHUB29yjdpylHPbZnghQZCv/view?usp=sharing) |
-| **User Validation Report** | [USER_VALIDATION_TEMPLATE.md](USER_VALIDATION_TEMPLATE.md) |
+| **Video Walkthrough** | [https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing](https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing) |
+| **Architecture Docs** | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| **User Validation Report** | [docs/validation-report.md](docs/validation-report.md) |
 | **Feedback Form** | [Google Form — User Feedback](https://forms.gle/5wK7gTqN3B2t8Lp76) |
 | **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956) |
 
@@ -169,7 +170,7 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 - [x] **Live demo link** deployed on Vercel
 - [x] **Demo video link** showing full MVP functionality
 - [x] **List of 5+ user wallet addresses** (Verified on Stellar Explorer)
-- [x] **User feedback documentation** (Linked Google Sheet & `USER_VALIDATION_TEMPLATE.md`)
+- [x] **User feedback documentation** (Linked Google Sheet & `docs/validation-report.md`)
 - [x] **CI/CD Pipeline workflow** working correctly (Vercel & GitHub Actions)
 
 ## User Onboarding Requirements
@@ -184,7 +185,7 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 4. Paste Google Form link + Excel link in this README.
 5. Record 5+ wallet addresses that actually used the app.
 
-Use `USER_VALIDATION_TEMPLATE.md` to track user sessions and tx hashes.
+Use `docs/validation-report.md` to track user sessions and tx hashes.
 
 ## Improvement Plan (Feedback-Driven)
 - Add explicit dispute arbitration role
