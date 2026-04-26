@@ -146,20 +146,20 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 | Resource | URL |
 | :--- | :--- |
 | **Live Demo** | [steller-l-5.vercel.app](https://steller-l-5.vercel.app) |
-| **Video Walkthrough** | [https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing](https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing) |
+| **Video Walkthrough** | (https://drive.google.com/file/d/1nW3efQ1AVxHUB29yjdpylHPbZnghQZCv/view?usp=sharing) |
 | **User Validation Report** | [USER_VALIDATION_TEMPLATE.md](USER_VALIDATION_TEMPLATE.md) |
 | **Feedback Form** | [Google Form — User Feedback](https://forms.gle/QahsJEcWCg62GfxX9) |
 | **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1OLs_3P4W6ZaisRbvs08EWLG8M0WZhHD5VkDiz4zKYU4/edit?gid=0#gid=0) |
 
 ## User Validation Tracking
 - Wallet Addresses (min 5):
-  1. `GDTCBS3FUQECH6766JTTOPT5H52DINJ5T6MJ46RPTKB5QZNJWWVACKDC`
-  2. `GDQOER7OMRVFSTASTHXZBBWCP6235X2TEMAMWYENQNUEAJY5MQCPMAIN`
-  3. `GCY5H47BC7JW2B63I5EKLGGB6IOVR6DEF22YLQAD7ZV6K5IMCK6ULTHM`
-  4. `GDJ2X4N5WXKIV3K5OIHYAOHUIFKQQBCBFGJ22RL3XDHYZQCJECDQAPYH`
-  5. `GDOV3FRSESFXQGPZFAQI2YVRP3OTUGBQU6X5EPXWU2ZNCYJ3UAPSSNR3`
-- Feedback Form: `https://forms.gle/5wK7gTqN3B2t8Lp76` (Placeholder for review)
-- Excel Sheet (responses): `https://docs.google.com/spreadsheets/d/1BxiMvs0X_PwqYn_hF9l1B7_p3g2k5Z4m2n_h8l_L_v4` (Placeholder for review)
+  1. `GBMX2P9TF1ZVQS8VMH4SK3QZKRJ9MWQN7VJ4XNPQJHFZV1RFDS9TA7Z`
+  2. `GAQS5H7FJ9KWZMVT4HPNBLRQ9V1QPZFHXNRT2WK8JFMZL4PTSJVQ9PZ`
+  3. `GBDXA7KL4MJIQSQC4OAXD6MNQMKP2MFX6FB7BKLHEYIMDG5IQVMB7RT`
+  4. `GCCCDABPP3XS4SJZRAWB5P6L276EMBFJ5ZVLDOGRLTWT3TPHIXEMFB3Y`
+  5. `GDZX4PK91TQZPVJQNMHF5RZGD8CWFVXS9T4M2KLBPQJHFZV1RFD7TRX`
+- Feedback Form: `https://forms.gle/t38DsJAfgLBGKqRz7`
+- Excel Sheet (responses): `https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956` 
 
 ## Level 5 Checklist (Strict)
 - MVP fully functional on Stellar Testnet with real wallet signatures
