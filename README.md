@@ -149,7 +149,7 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 | **Video Walkthrough** | (https://drive.google.com/file/d/1nW3efQ1AVxHUB29yjdpylHPbZnghQZCv/view?usp=sharing) |
 | **User Validation Report** | [USER_VALIDATION_TEMPLATE.md](USER_VALIDATION_TEMPLATE.md) |
 | **Feedback Form** | [Google Form — User Feedback](https://forms.gle/QahsJEcWCg62GfxX9) |
-| **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1OLs_3P4W6ZaisRbvs08EWLG8M0WZhHD5VkDiz4zKYU4/edit?gid=0#gid=0) |
+| **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956) |
 
 ## User Validation Tracking
 - Wallet Addresses (min 5):
