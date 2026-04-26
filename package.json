@@ -10,6 +10,7 @@
     "preview": "npm --prefix frontend run preview",
     "contract:check": "cargo check --manifest-path contract/trustpay-escrow/Cargo.toml",
     "contract:build": "cargo build --manifest-path contract/trustpay-escrow/Cargo.toml --target wasm32-unknown-unknown --release",
-    "test": "cargo test --manifest-path contract/trustpay-escrow/Cargo.toml"
+    "contract:test": "cargo test --manifest-path contract/trustpay-escrow/Cargo.toml",
+    "test": "npm run contract:test && npm --prefix frontend run test"
   }
 }

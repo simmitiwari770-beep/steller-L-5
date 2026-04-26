@@ -141,6 +141,20 @@ npm run dev
 ### Contract
 Deploy with Soroban CLI commands above on Stellar Testnet.
 
+## 📸 Screenshots
+
+### Home / Connect
+*(Add screenshot image here)*
+
+### Dashboard
+*(Add screenshot image here)*
+
+### Create Escrow
+*(Add screenshot image here)*
+
+### Transaction Complete
+*(Add screenshot image here)*
+
 ## 🔗 Links & Resources
 
 | Resource | URL |
