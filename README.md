@@ -147,10 +147,9 @@ Deploy with Soroban CLI commands above on Stellar Testnet.
 | :--- | :--- |
 | **Live Demo** | [steller-l-5.vercel.app](https://steller-l-5.vercel.app) |
 | **Video Walkthrough** | [https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing](https://drive.google.com/file/d/16kFqB8XvDo1qPi_OvPWUNpsqB-2TF1Q9/view?usp=sharing) |
-| **Architecture Docs** | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | **User Validation Report** | [USER_VALIDATION_TEMPLATE.md](USER_VALIDATION_TEMPLATE.md) |
-| **Feedback Form** | [Google Form — User Feedback](https://forms.gle/5wK7gTqN3B2t8Lp76) |
-| **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1BxiMvs0X_PwqYn_hF9l1B7_p3g2k5Z4m2n_h8l_L_v4) |
+| **Feedback Form** | [Google Form — User Feedback](https://forms.gle/QahsJEcWCg62GfxX9) |
+| **Feedback Sheet** | [Google Sheet — Responses](https://docs.google.com/spreadsheets/d/1OLs_3P4W6ZaisRbvs08EWLG8M0WZhHD5VkDiz4zKYU4/edit?gid=0#gid=0) |
 
 ## User Validation Tracking
 - Wallet Addresses (min 5):
