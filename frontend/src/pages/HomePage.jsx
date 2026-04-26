@@ -2,7 +2,7 @@ import { HORIZON_URL } from "../lib/constants";
 
 export default function HomePage({ walletAddress, onCopy }) {
   return (
-    <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900 p-6">
+    <section className="space-y-4 rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
       <h1 className="text-2xl font-semibold text-cyan-300">
         Decentralized escrow for peer payments
       </h1>

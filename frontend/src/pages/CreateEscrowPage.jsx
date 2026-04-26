@@ -39,7 +39,7 @@ export default function CreateEscrowPage({ walletAddress, onCreate, loading }) {
   }
 
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+    <section className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
       <h2 className="text-xl font-semibold text-cyan-300">Create Escrow</h2>
       <form className="mt-4 space-y-4" onSubmit={submit}>
         <label className="block text-sm text-slate-300">

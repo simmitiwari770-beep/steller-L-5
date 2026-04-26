@@ -26,7 +26,7 @@
 ## Data Collection Links
 
 - **Google Form (Feedback Collection):** [https://docs.google.com/forms/d/e/1FAIpQLSeyG09IpC47Q6YQ0hk9Q7Wq6UXt6ZwDoFfRatLHWKRPTN_ACg/viewform](https://docs.google.com/forms/d/e/1FAIpQLSeyG09IpC47Q6YQ0hk9Q7Wq6UXt6ZwDoFfRatLHWKRPTN_ACg/viewform)
-- **Exported Responses Sheet:** [https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit...](https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956)
+- **Exported Responses Sheet:** [https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956](https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956)
 
 **Note for reviewer:** The Google Form collected: name, email, testnet wallet address, actions completed, ease of use rating (1-5), overall rating (1-5), specific UX issues, and suggested improvements.
 

@@ -11,7 +11,7 @@ export default function DashboardPage({
   escrowTxMap,
 }) {
   return (
-    <section className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+    <section className="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-cyan-300">Escrow Dashboard</h2>
         <p className="text-xs text-slate-400">{escrows.length} escrows indexed</p>
