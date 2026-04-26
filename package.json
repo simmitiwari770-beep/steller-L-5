@@ -8,7 +8,8 @@
     "build": "npm --prefix frontend run build",
     "lint": "npm --prefix frontend run lint",
     "preview": "npm --prefix frontend run preview",
-    "contract:check": "cargo check --manifest-path contract/Cargo.toml",
-    "contract:build": "cargo build --manifest-path contract/Cargo.toml --target wasm32-unknown-unknown --release"
+    "contract:check": "cargo check --manifest-path contract/trustpay-escrow/Cargo.toml",
+    "contract:build": "cargo build --manifest-path contract/trustpay-escrow/Cargo.toml --target wasm32-unknown-unknown --release",
+    "test": "cargo test --manifest-path contract/trustpay-escrow/Cargo.toml"
   }
 }

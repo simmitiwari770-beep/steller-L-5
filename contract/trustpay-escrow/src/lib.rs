@@ -197,3 +197,7 @@ impl TrustPayEscrowContract {
         get_escrow_ids(&env)
     }
 }
+
+#[cfg(test)]
+mod test;
+
