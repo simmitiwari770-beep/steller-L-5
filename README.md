@@ -49,13 +49,15 @@ We have ensured all requirements for the MVP submission are fully met and docume
 
 ### 📋 Table 2: User Feedback Implementation
 
-| User Name | User Email | User Wallet Address | User Feedback | Commit ID (Changes Made) |
-|-----------|------------|---------------------|---------------|-------------------------|
-| Ritesh Kumar | riteshrajpurohit05@gmail.com | `GBMX2P9TF1ZVQS8VMH4SK3QZKRJ9MWQN7VJ4XNPQJHFZV1RFDS9TA7Z` | "Transaction is bit slow loading. Make it work faster." — Overall: ⭐5/5 | [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8) — fix: production escrow action gating and tx receipt reliability |
-| Aryan Verma | aryan.verma.dev@gmail.com | `GAQS5H7FJ9KWZMVT4HPNBLRQ9V1QPZFHXNRT2WK8JFMZL4PTSJVQ9PZ` | "I clicked on lock funds but there is a problem to implement. Check lock funds." — Overall: ⭐4/5 | [e01a039](https://github.com/simmitiwari770-beep/steller-L-5/commit/e01a039) — Fix Stellar SDK version and blank screen crash on escrow creation |
-| Rahul Mehta | rahul.mehta.dev@gmail.com | `GBDXA7KL4MJIQSQC4OAXD6MNMKP2MFX6FB7BKLHEYIMDG5IQVMB7RT` | "Slow loading of explorer link. Work on transaction receipt." — Overall: ⭐5/5 | [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8) — fix: production escrow action gating and tx receipt reliability |
-| Simmi Sharma | simmitiwari770@gmail.com | `GCCCDABPP3XS4SJZRAWB5P6L276EMBFJ5ZVLDOGRLTWT3TPHIXEMFB3Y` | "Initially had trouble connecting wallet. Everything is working good now." — Overall: ⭐5/5 | [09245f0](https://github.com/simmitiwari770-beep/steller-L-5/commit/09245f0) — fix: default contract IDs and stellar.toml for Freighter warnings |
-| Simran Kaur | simran.uiux@gmail.com | `GDZX4PK91TQZPVJQNMHF5RZGD8CWFVXS9T4M2KLBPQJHFZV1RFD7TRX` | "Issue in receiving payment. Improve payment method." — Overall: ⭐4/5 | [ca5b8da](https://github.com/simmitiwari770-beep/steller-L-5/commit/ca5b8da) — fix: update CI paths, enhance mobile responsiveness, and fix markdown links |
+| User Name | User Email | Wallet (Short) | User Feedback | Commit ID |
+|-----------|------------|----------------|---------------|-----------|
+| Ritesh Kumar | riteshrajpurohit05@gmail.com | `GBMX2P...TA7Z` | "Transaction is bit slow loading. Make it work faster." ⭐ 5/5 | [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8) — fix: tx receipt reliability |
+| Aryan Verma | aryan.verma.dev@gmail.com | `GAQS5H...Q9PZ` | "Lock funds has a problem. Check lock funds." ⭐ 4/5 | [e01a039](https://github.com/simmitiwari770-beep/steller-L-5/commit/e01a039) — Fix SDK version & blank screen crash |
+| Rahul Mehta | rahul.mehta.dev@gmail.com | `GBDXA7...B7RT` | "Slow loading of explorer link. Work on transaction receipt." ⭐ 5/5 | [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8) — fix: tx receipt reliability |
+| Simmi Sharma | simmitiwari770@gmail.com | `GCCCDA...FB3Y` | "Had trouble connecting wallet initially. Working good now." ⭐ 5/5 | [09245f0](https://github.com/simmitiwari770-beep/steller-L-5/commit/09245f0) — fix: stellar.toml & Freighter warnings |
+| Simran Kaur | simran.uiux@gmail.com | `GDZX4P...7TRX` | "Issue in receiving payment. Improve payment method." ⭐ 4/5 | [ca5b8da](https://github.com/simmitiwari770-beep/steller-L-5/commit/ca5b8da) — fix: mobile responsiveness |
+
+> 🔍 Full wallet addresses are listed in **Table 1** above.
 
 ---
 
