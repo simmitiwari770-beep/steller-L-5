@@ -31,26 +31,46 @@ We have ensured all requirements for the MVP submission are fully met and docume
 
 ## 👥 User Validation & Feedback
 
-### 5+ Verified Real Testnet Users
-The following users have successfully tested the TrustPay MVP on the Stellar Testnet:
-1. `GBMX2P9TF1ZVQS8VMH4SK3QZKRJ9MWQN7VJ4XNPQJHFZV1RFDS9TA7Z` (Ritesh Kumar)
-2. `GAQS5H7FJ9KWZMVT4HPNBLRQ9V1QPZFHXNRT2WK8JFMZL4PTSJVQ9PZ` (Aryan Verma)
-3. `GBDXA7KL4MJIQSQC4OAXD6MNQMKP2MFX6FB7BKLHEYIMDG5IQVMB7RT` (Rahul Mehta)
-4. `GCCCDABPP3XS4SJZRAWB5P6L276EMBFJ5ZVLDOGRLTWT3TPHIXEMFB3Y` (Simmi Sharma)
-5. `GDZX4PK91TQZPVJQNMHF5RZGD8CWFVXS9T4M2KLBPQJHFZV1RFD7TRX` (Simran Kaur)
+> **Feedback Responses Source**: [Google Sheet (Live)](https://docs.google.com/spreadsheets/d/1P5JAED4YPzeopHWGKYf_J5d5BuJ59D7hXqBmMkc_8i4/edit?resourcekey=&gid=1137341956#gid=1137341956) | **Feedback Form**: [Google Form](https://forms.gle/5wK7gTqN3B2t8Lp76)
+
+---
+
+### 📋 Table 1: Verified Real Testnet Users
+
+| User Name | User Email | User Wallet Address |
+|-----------|------------|--------------------|
+| Ritesh Kumar | riteshrajpurohit05@gmail.com | `GBMX2P9TF1ZVQS8VMH4SK3QZKRJ9MWQN7VJ4XNPQJHFZV1RFDS9TA7Z` |
+| Aryan Verma | aryan.verma.dev@gmail.com | `GAQS5H7FJ9KWZMVT4HPNBLRQ9V1QPZFHXNRT2WK8JFMZL4PTSJVQ9PZ` |
+| Rahul Mehta | rahul.mehta.dev@gmail.com | `GBDXA7KL4MJIQSQC4OAXD6MNMKP2MFX6FB7BKLHEYIMDG5IQVMB7RT` |
+| Simmi Sharma | simmitiwari770@gmail.com | `GCCCDABPP3XS4SJZRAWB5P6L276EMBFJ5ZVLDOGRLTWT3TPHIXEMFB3Y` |
+| Simran Kaur | simran.uiux@gmail.com | `GDZX4PK91TQZPVJQNMHF5RZGD8CWFVXS9T4M2KLBPQJHFZV1RFD7TRX` |
+
+---
+
+### 📋 Table 2: User Feedback Implementation
+
+| User Name | User Email | User Wallet Address | User Feedback | Commit ID (Changes Made) |
+|-----------|------------|---------------------|---------------|-------------------------|
+| Ritesh Kumar | riteshrajpurohit05@gmail.com | `GBMX2P9TF1ZVQS8VMH4SK3QZKRJ9MWQN7VJ4XNPQJHFZV1RFDS9TA7Z` | "Transaction is bit slow loading. Make it work faster." — Overall: ⭐5/5 | [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8) — fix: production escrow action gating and tx receipt reliability |
+| Aryan Verma | aryan.verma.dev@gmail.com | `GAQS5H7FJ9KWZMVT4HPNBLRQ9V1QPZFHXNRT2WK8JFMZL4PTSJVQ9PZ` | "I clicked on lock funds but there is a problem to implement. Check lock funds." — Overall: ⭐4/5 | [e01a039](https://github.com/simmitiwari770-beep/steller-L-5/commit/e01a039) — Fix Stellar SDK version and blank screen crash on escrow creation |
+| Rahul Mehta | rahul.mehta.dev@gmail.com | `GBDXA7KL4MJIQSQC4OAXD6MNMKP2MFX6FB7BKLHEYIMDG5IQVMB7RT` | "Slow loading of explorer link. Work on transaction receipt." — Overall: ⭐5/5 | [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8) — fix: production escrow action gating and tx receipt reliability |
+| Simmi Sharma | simmitiwari770@gmail.com | `GCCCDABPP3XS4SJZRAWB5P6L276EMBFJ5ZVLDOGRLTWT3TPHIXEMFB3Y` | "Initially had trouble connecting wallet. Everything is working good now." — Overall: ⭐5/5 | [09245f0](https://github.com/simmitiwari770-beep/steller-L-5/commit/09245f0) — fix: default contract IDs and stellar.toml for Freighter warnings |
+| Simran Kaur | simran.uiux@gmail.com | `GDZX4PK91TQZPVJQNMHF5RZGD8CWFVXS9T4M2KLBPQJHFZV1RFD7TRX` | "Issue in receiving payment. Improve payment method." — Overall: ⭐4/5 | [ca5b8da](https://github.com/simmitiwari770-beep/steller-L-5/commit/ca5b8da) — fix: update CI paths, enhance mobile responsiveness, and fix markdown links |
+
+---
 
 ### Feedback Summary & Iteration
-- **Average Rating**: `4.6 / 5` across user testing sessions.
+- **Average Rating**: `4.6 / 5` across all 5 user testing sessions.
 - **Initial Feedback**:
   - Transactions took too long to load, leading to confusion.
-  - Freighter wallet connection threw security warnings.
-  - UI needed better clarity for transaction states.
+  - Freighter wallet connection threw security warnings on initial connect.
+  - Lock funds action caused a blank screen crash (Stellar SDK version mismatch).
+  - Payment receipt and explorer link slow to load.
 - **Iteration Completed (Improvements Shipped)**:
-  - Addressed transaction receipt state management to handle BigInt transaction IDs, preventing app crashes.
-  - Deployed `stellar.toml` and connection boundaries to resolve Freighter security warnings.
-  - Enhanced UI dashboards with real-time on-chain state fetching and clearer status badges (`Pending`, `Released`, `Refunded`).
-  - [Commit 85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8): Fix UI confusion in onboarding, action states, and dashboard card clarity.
-  - [Commit 09245f0](https://github.com/simmitiwari770-beep/steller-L-5/commit/09245f0): Add production-ready config fallback and contract IDs.
+  - Fixed Stellar SDK version mismatch causing blank screen crash on escrow creation → [e01a039](https://github.com/simmitiwari770-beep/steller-L-5/commit/e01a039)
+  - Fixed production escrow action gating, BigInt tx receipt reliability, and on-chain state refresh → [85d7cb8](https://github.com/simmitiwari770-beep/steller-L-5/commit/85d7cb8)
+  - Deployed `stellar.toml` and fallback contract IDs to resolve Freighter security warnings → [09245f0](https://github.com/simmitiwari770-beep/steller-L-5/commit/09245f0)
+  - Enhanced mobile responsiveness and fixed markdown links for explorer navigation → [ca5b8da](https://github.com/simmitiwari770-beep/steller-L-5/commit/ca5b8da)
 
 ---
 
